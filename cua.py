@@ -6,6 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.chrome.options import Options
 import time
 from bs4 import BeautifulSoup
 
@@ -35,8 +36,20 @@ def loop_through_subjects(sub):
     expand.click()
 
     wait()
+    WebDriverWait(driver, 5).until(
+        EC.element_to_be_clickable((By.CLASS_NAME, 'coursedescription'))
+    )
+    description = driver.find_elements(By.CLASS_NAME, 'coursedescription')
+    for desc in description:
+        desc.click()
+
+    wait()
     class_titles = driver.find_elements(By.CLASS_NAME, 'accordion')
     summaries = driver.find_elements(By.TAG_NAME, 'table')
+    content = driver.find_elements(By.CLASS_NAME, 'morecontent')
+    cc = []
+    for c in content:
+        cc.append(c.find_element(By.TAG_NAME, 'span'))
 
     # for title in class_titles:
     #     print(title.text)
@@ -44,11 +57,14 @@ def loop_through_subjects(sub):
     # for summary in summaries:
     #     print(summary.text)
 
-    for title, summary in zip(class_titles, summaries):
-        print(f'Course: {title.text}\nTable: {summary.text}\n')
+    for title, summary, desc in zip(class_titles, summaries, cc):
+        print(f'Course: {title.text}\nTable: {summary.text}\nContent: {desc.text}\n')
 
 service = Service(executable_path='/Users/eliorocha/Downloads/chromedriver-mac-arm64/chromedriver')
-driver = webdriver.Chrome(service=service)
+options = Options()
+options.add_argument('--headless=new')
+driver = webdriver.Chrome(service=service, options=options)
+
 
 url = 'https://engineering.catholic.edu/academics/courses/course-schedules/index.html'
 driver.get(url)
@@ -64,6 +80,7 @@ subjects = [
     'Materials Science and Engineering',
     'Physics'
 ]
+test_subject = ['Materials Science and Engineering']
 
 wait()
 WebDriverWait(driver, 5).until(
@@ -72,6 +89,8 @@ WebDriverWait(driver, 5).until(
 term = Select(driver.find_element(By.ID, 'term'))
 term.select_by_visible_text('Spring 2026')
 
+# for subject in subjects:
+#     loop_through_subjects(subject)
 for subject in subjects:
     loop_through_subjects(subject)
 

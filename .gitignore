@@ -1,2 +1,5 @@
 chromedriver
 s3.py
+hidden/
+.env
+.vscode
